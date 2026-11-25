@@ -29,7 +29,7 @@ class ParametrizationCallChecker(ScenarioChecker):
         if not imported_contexts:
             return []
 
-        for decorator in self.get_params_decorators(init_node):
+        for decorator in self.get_params_decorators(init_node, context.import_from_nodes):
             for arg in decorator.args:
                 if isinstance(arg, ast.Call):
                     name_node = unwrap_name_from_ast_node(arg)

@@ -18,7 +18,7 @@ class ParametrizationLimitChecker(ScenarioChecker):
         if init_node is None or not init_node.decorator_list:
             return errors
 
-        for decorator in self.get_params_decorators(init_node):
+        for decorator in self.get_params_decorators(init_node, context.import_from_nodes):
             if len(decorator.args) > config.max_params_count:
                 errors.append(ExceedMaxParamsCount(decorator.lineno, decorator.col_offset,
                                                    current=len(decorator.args),

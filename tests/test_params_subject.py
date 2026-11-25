@@ -10,6 +10,7 @@ def test_params_without_subject_substitution():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationSubjectChecker)
     code = """
+    from vedro import params
     class Scenario:
         subject = 'any subject'
         @params(1)
@@ -38,6 +39,7 @@ def test_param_without_subject_substitution():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationSubjectChecker)
     code = """
+    from vedro import params
     class Scenario:
         subject = 'any subject'
         @params(1)
@@ -50,6 +52,7 @@ def test_params_with_subject_substitution():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationSubjectChecker)
     code = """
+    from vedro import params
     class Scenario:
         subject = 'any subject {any}'
         @params(1)

@@ -9,6 +9,7 @@ def test_call_func_in_params():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationCallChecker)
     code = """
+    from vedro import params
     class Scenario:
         subject = 'any subject'
         @params(foo())
@@ -21,6 +22,7 @@ def test_context_call_func_in_params():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationCallChecker)
     code = """
+    from vedro import params
     from contexts import foo
     class Scenario:
         subject = 'any subject'
@@ -34,6 +36,7 @@ def test_context_call_lambda_in_params():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationCallChecker)
     code = """
+    from vedro import params
     from contexts import foo
     class Scenario:
         subject = 'any subject'
@@ -47,6 +50,7 @@ def test_constant_in_params():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationCallChecker)
     code = """
+    from vedro import params
     class Scenario:
         subject = 'any subject'
         @params(1)
@@ -59,6 +63,7 @@ def test_schema_attribute_in_params():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationCallChecker)
     code = """
+    from vedro import params
     class Scenario:
         subject = 'any subject'
         @params(schema.str)
@@ -71,6 +76,7 @@ def test_schema_call_in_params():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_scenario_checker(ParametrizationCallChecker)
     code = """
+    from vedro import params
     from d42 import schema
     class Scenario:
         subject = 'any subject'

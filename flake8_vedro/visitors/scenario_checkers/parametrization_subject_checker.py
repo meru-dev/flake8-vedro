@@ -15,7 +15,7 @@ class ParametrizationSubjectChecker(ScenarioChecker):
         init_node = self.get_init_step(context.scenario_node)
 
         if init_node and init_node.decorator_list:
-            params_decorator = self.get_params_decorators(init_node)
+            params_decorator = self.get_params_decorators(init_node, context.import_from_nodes)
 
             if len(params_decorator) > 1:
                 subject = self.get_subject(context.scenario_node)

@@ -2,6 +2,8 @@ import ast
 import pathlib
 from typing import List, NamedTuple, Optional
 
+from flake8_vedro.helpers import is_vedro_decorator
+
 SCENARIOS_FOLDER = 'scenarios'
 SCENARIO_CLASS_NAME = 'Scenario'
 
@@ -47,23 +49,12 @@ class ScenarioHelper:
         subjects = self.get_subjects(node)
         return subjects[0] if subjects else None
 
-    def get_params_decorators(self, init_node: ast.FunctionDef) -> List[ast.Call]:
-        params_decorator = []
-        for decorator in init_node.decorator_list:
-            if isinstance(decorator, ast.Call):
-
-                # @vedro.params
-                if (
-                        isinstance(decorator.func, ast.Attribute)
-                        and decorator.func.value.id == 'vedro'
-                        and decorator.func.attr == 'params'
-                ):
-                    params_decorator.append(decorator)
-
-                # @params
-                elif isinstance(decorator.func, ast.Name) and decorator.func.id == 'params':
-                    params_decorator.append(decorator)
-        return params_decorator
+    def get_params_decorators(self, init_node: ast.FunctionDef,
+                              import_from_nodes: List[ast.ImportFrom]) -> List[ast.Call]:
+        return [
+            decorator for decorator in init_node.decorator_list
+            if isinstance(decorator, ast.Call) and is_vedro_decorator(decorator, import_from_nodes, 'params')
+        ]
 
     def get_when_steps(self, steps: List) -> List:
         return [
