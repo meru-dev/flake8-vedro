@@ -12,8 +12,6 @@ from flake8_vedro.helpers import (
 )
 from flake8_vedro.visitors.scenario_visitor import Context, ScenarioVisitor
 
-HELPER_PREFIXES = ('assert', 'check', 'verify', 'validate', 'ensure')
-
 
 @ScenarioVisitor.register_steps_checker
 class ApiResponseAssertsChecker(StepsChecker):
@@ -90,26 +88,6 @@ class ApiResponseAssertsChecker(StepsChecker):
                         return True
         return False
 
-    def _is_checked_by_helper(self, steps: List, response_name: str) -> bool:
-        for step in steps:
-            for node in self._walk(step.body):
-                if not isinstance(node, ast.Call):
-                    continue
-
-                if isinstance(node.func, ast.Attribute):
-                    func_name = node.func.attr
-                elif isinstance(node.func, ast.Name):
-                    func_name = node.func.id
-                else:
-                    func_name = ''
-                if func_name.lower().startswith(HELPER_PREFIXES):
-                    return True
-
-                arguments = [*node.args, *(keyword.value for keyword in node.keywords)]
-                if any(self._get_variable_name(argument) == response_name for argument in arguments):
-                    return True
-        return False
-
     def check_steps(self, context: Context, config) -> List[Error]:
         if not config.api_interfaces_list:
             return []
@@ -134,11 +112,7 @@ class ApiResponseAssertsChecker(StepsChecker):
         reported = set()
         for step in self.get_when_steps(context.steps):
             for response_name, node in self._get_api_responses(step, api_interfaces):
-                if (
-                    response_name in reported
-                    or self._is_status_checked(assert_steps, response_name)
-                    or self._is_checked_by_helper(assert_steps, response_name)
-                ):
+                if response_name in reported or self._is_status_checked(assert_steps, response_name):
                     continue
 
                 reported.add(response_name)

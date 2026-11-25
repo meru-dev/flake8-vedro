@@ -180,7 +180,7 @@ def test_status_code_compared_without_assert():
     assert_not_error(ScenarioVisitor, code, config=DefaultConfig(api_interfaces_list=['ChatApi']))
 
 
-def test_response_checked_by_helper():
+def test_response_checked_by_helper_is_not_trusted():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(ApiResponseAssertsChecker)
     code = """
@@ -194,10 +194,11 @@ def test_response_checked_by_helper():
             assert self.response.json() == {"id": 123}
             self.check_response()
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(api_interfaces_list=['ChatApi']))
+    assert_error(ScenarioVisitor, code, ApiResponseStatusNotAsserted, name="self.response",
+                 config=DefaultConfig(api_interfaces_list=['ChatApi']))
 
 
-def test_response_passed_to_function():
+def test_response_passed_to_function_is_not_trusted():
     ScenarioVisitor.deregister_all()
     ScenarioVisitor.register_steps_checker(ApiResponseAssertsChecker)
     code = """
@@ -211,7 +212,8 @@ def test_response_passed_to_function():
             assert self.response.json() == {"id": 123}
             response_is_valid(self.response)
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(api_interfaces_list=['ChatApi']))
+    assert_error(ScenarioVisitor, code, ApiResponseStatusNotAsserted, name="self.response",
+                 config=DefaultConfig(api_interfaces_list=['ChatApi']))
 
 
 def test_response_derived_value():
