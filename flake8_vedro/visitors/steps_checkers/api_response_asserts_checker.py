@@ -34,20 +34,28 @@ class ApiResponseAssertsChecker(StepsChecker):
             return f'self.{node.attr}'
         return None
 
+    @staticmethod
+    def _is_interface_call(node: ast.expr, interfaces: List[ast.alias]) -> bool:
+        if not isinstance(node, ast.Call) or not (name_node := unwrap_name_from_ast_node(node)):
+            return False
+        name = get_ast_name_node_name(name_node)
+        return any(name in (interface.name, interface.asname) for interface in interfaces)
+
     def _is_api_call(self, value: Optional[ast.expr], interfaces: List[ast.alias]) -> bool:
         if not isinstance(value, ast.Call):
             return False
+        return any(self._is_interface_call(node, interfaces) for node in self._walk([value]))
 
-        # Api().get().json() saves a value derived from the response, not the response itself
-        if isinstance(value.func, ast.Attribute) and value.func.attr == 'json':
-            return False
-
-        for node in self._walk([value]):
-            if isinstance(node, ast.Call) and (name_node := unwrap_name_from_ast_node(node)):
-                name = get_ast_name_node_name(name_node)
-                if any(name in (interface.name, interface.asname) for interface in interfaces):
-                    return True
-        return False
+    def _get_unsaved_api_calls(self, step, interfaces: List[ast.alias]) -> List[ast.Call]:
+        calls = []
+        for node in self._walk(step.body):
+            if not isinstance(node, ast.Expr):
+                continue
+            value = node.value.value if isinstance(node.value, ast.Await) else node.value
+            # Api().get() is not saved, but self.responses.append(Api().get()) is
+            if self._is_interface_call(value, interfaces):
+                calls.append(value)
+        return calls
 
     def _get_api_responses(self, step, interfaces: List[ast.alias]) -> List[Tuple[str, ast.AST]]:
         responses = []
@@ -117,4 +125,7 @@ class ApiResponseAssertsChecker(StepsChecker):
 
                 reported.add(response_name)
                 errors.append(ApiResponseStatusNotAsserted(node.lineno, node.col_offset, name=response_name))
+
+            for call in self._get_unsaved_api_calls(step, api_interfaces):
+                errors.append(ApiResponseStatusNotAsserted(call.lineno, call.col_offset, name=ast.unparse(call.func)))
         return errors

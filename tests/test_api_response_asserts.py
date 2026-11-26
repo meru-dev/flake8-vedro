@@ -229,7 +229,8 @@ def test_response_derived_value():
         def then_it_should_return_user(self):
             assert self.user == {"id": 123}
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(api_interfaces_list=['ChatApi']))
+    assert_error(ScenarioVisitor, code, ApiResponseStatusNotAsserted, name="self.user",
+                 config=DefaultConfig(api_interfaces_list=['ChatApi']))
 
 
 def test_response_not_saved():
@@ -241,6 +242,74 @@ def test_response_not_saved():
     class Scenario(vedro.Scenario):
         def when_user_requests(self):
             ChatApi().get_user()
+
+        def then_it_should_return_user(self):
+            assert self.user == {"id": 123}
+    """
+    assert_error(ScenarioVisitor, code, ApiResponseStatusNotAsserted, name="ChatApi().get_user",
+                 config=DefaultConfig(api_interfaces_list=['ChatApi']))
+
+
+def test_awaited_response_not_saved():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(ApiResponseAssertsChecker)
+    code = """
+    from interfaces.chat_api import ChatApi
+
+    class Scenario(vedro.Scenario):
+        async def when_user_requests(self):
+            await ChatApi(self.user).get_user()
+
+        def then_it_should_return_user(self):
+            assert self.user == {"id": 123}
+    """
+    assert_error(ScenarioVisitor, code, ApiResponseStatusNotAsserted, name="ChatApi(self.user).get_user",
+                 config=DefaultConfig(api_interfaces_list=['ChatApi']))
+
+
+def test_response_derived_value_not_saved():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(ApiResponseAssertsChecker)
+    code = """
+    from interfaces.chat_api import ChatApi
+
+    class Scenario(vedro.Scenario):
+        def when_user_requests(self):
+            ChatApi().get_user().json()
+
+        def then_it_should_return_user(self):
+            assert self.user == {"id": 123}
+    """
+    assert_error(ScenarioVisitor, code, ApiResponseStatusNotAsserted, name="ChatApi().get_user().json",
+                 config=DefaultConfig(api_interfaces_list=['ChatApi']))
+
+
+def test_response_saved_into_collection():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(ApiResponseAssertsChecker)
+    code = """
+    from interfaces.chat_api import ChatApi
+
+    class Scenario(vedro.Scenario):
+        def when_user_requests(self):
+            self.responses.append(ChatApi().get_user())
+
+        def then_it_should_return_user(self):
+            assert self.responses[0].status_code == 200
+    """
+    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(api_interfaces_list=['ChatApi']))
+
+
+def test_unsaved_call_of_interface_not_in_api_interfaces_list():
+    ScenarioVisitor.deregister_all()
+    ScenarioVisitor.register_steps_checker(ApiResponseAssertsChecker)
+    code = """
+    from interfaces.chat_api import ChatApi
+    from interfaces.kafka_api import KafkaApi
+
+    class Scenario(vedro.Scenario):
+        def when_user_requests(self):
+            KafkaApi().send_message()
 
         def then_it_should_return_user(self):
             assert self.user == {"id": 123}
