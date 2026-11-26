@@ -35,8 +35,15 @@ class ApiResponseAssertsChecker(StepsChecker):
         return None
 
     @staticmethod
+    def _unwrap_await(node: Optional[ast.expr]) -> Optional[ast.expr]:
+        return node.value if isinstance(node, ast.Await) else node
+
+    @staticmethod
     def _is_interface_call(node: ast.expr, interfaces: List[ast.alias]) -> bool:
-        if not isinstance(node, ast.Call) or not (name_node := unwrap_name_from_ast_node(node)):
+        if not isinstance(node, ast.Call):
+            return False
+        name_node = unwrap_name_from_ast_node(node)
+        if name_node is None:
             return False
         name = get_ast_name_node_name(name_node)
         return any(name in (interface.name, interface.asname) for interface in interfaces)
@@ -51,7 +58,7 @@ class ApiResponseAssertsChecker(StepsChecker):
         for node in self._walk(step.body):
             if not isinstance(node, ast.Expr):
                 continue
-            value = node.value.value if isinstance(node.value, ast.Await) else node.value
+            value = self._unwrap_await(node.value)
             # Api().get() is not saved, but self.responses.append(Api().get()) is
             if self._is_interface_call(value, interfaces):
                 calls.append(value)
@@ -67,8 +74,7 @@ class ApiResponseAssertsChecker(StepsChecker):
             else:
                 continue
 
-            value = node.value.value if isinstance(node.value, ast.Await) else node.value
-            if not self._is_api_call(value, interfaces):
+            if not self._is_api_call(self._unwrap_await(node.value), interfaces):
                 continue
 
             for target in targets:
