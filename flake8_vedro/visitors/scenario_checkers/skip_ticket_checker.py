@@ -14,21 +14,21 @@ class SkipTicketChecker(ScenarioChecker):
 
     @staticmethod
     def _get_reason(decorator: ast.expr) -> Optional[str]:
+        """
+        Return skip reason: empty string if there is no reason, None if it cannot be checked statically
+        """
         if not isinstance(decorator, ast.Call):
             return ''
 
-        reason = decorator.args[0] if decorator.args else None
+        keywords = {keyword.arg: keyword.value for keyword in decorator.keywords}
+        reason = decorator.args[0] if decorator.args else keywords.get('reason')
+
         if reason is None:
-            reason = next(
-                (keyword.value for keyword in decorator.keywords if keyword.arg == 'reason'),
-                None,
-            )
-        if reason is None or (isinstance(reason, ast.Constant) and reason.value is None):
+            return ''
+        if isinstance(reason, ast.Constant) and reason.value is None:
             return ''
         if isinstance(reason, ast.Constant) and isinstance(reason.value, str):
             return reason.value
-
-        # dynamic reason cannot be checked statically
         return None
 
     def check_scenario(self, context: Context, config) -> List[Error]:

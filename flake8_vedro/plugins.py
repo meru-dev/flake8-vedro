@@ -126,18 +126,19 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             skip_ticket_pattern=cls.parse_skip_ticket_pattern(options.skip_ticket_pattern)
         )
 
-    @classmethod
-    def parse_ignore_variables_pattern(cls, ignore_variables_pattern: str | None) -> re.Pattern | None:
-        if ignore_variables_pattern is None:
-            return ignore_variables_pattern
+    @staticmethod
+    def _parse_pattern(pattern: str | None, option_name: str) -> re.Pattern | None:
+        if pattern is None:
+            return pattern
 
         try:
-            return re.compile(ignore_variables_pattern)
+            return re.compile(pattern)
         except re.error as e:
-            raise ValueError(
-                f"Invalid regex pattern for --ignore-variables-pattern: "
-                f"'{ignore_variables_pattern}' ({e})"
-            )
+            raise ValueError(f"Invalid regex pattern for {option_name}: '{pattern}' ({e})")
+
+    @classmethod
+    def parse_ignore_variables_pattern(cls, ignore_variables_pattern: str | None) -> re.Pattern | None:
+        return cls._parse_pattern(ignore_variables_pattern, '--ignore-variables-pattern')
 
     @classmethod
     def parse_allow_ifs_in_steps(cls, allow_ifs_in_steps: list[str] | None) -> tuple | None:
@@ -159,13 +160,4 @@ class VedroScenarioStylePlugin(PluginWithFilename):
 
     @classmethod
     def parse_skip_ticket_pattern(cls, skip_ticket_pattern: str | None) -> re.Pattern | None:
-        if skip_ticket_pattern is None:
-            return skip_ticket_pattern
-
-        try:
-            return re.compile(skip_ticket_pattern)
-        except re.error as e:
-            raise ValueError(
-                f"Invalid regex pattern for --skip-ticket-pattern: "
-                f"'{skip_ticket_pattern}' ({e})"
-            )
+        return cls._parse_pattern(skip_ticket_pattern, '--skip-ticket-pattern')
