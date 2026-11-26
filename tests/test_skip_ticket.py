@@ -7,6 +7,10 @@ from flake8_vedro.plugins import VedroScenarioStylePlugin
 from flake8_vedro.visitors.scenario_checkers import SkipTicketChecker
 from flake8_vedro.visitors.scenario_visitor import ScenarioVisitor
 
+TICKET_CONFIG = DefaultConfig(
+    skip_ticket_pattern=VedroScenarioStylePlugin.parse_skip_ticket_pattern(r'[A-Z][A-Z0-9]+-\d+')
+)
+
 
 def test_bare_vedro_skip():
     ScenarioVisitor.deregister_all()
@@ -17,7 +21,7 @@ def test_bare_vedro_skip():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_bare_skip_imported_from_vedro():
@@ -31,7 +35,7 @@ def test_bare_skip_imported_from_vedro():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_vedro_skip_without_reason():
@@ -43,7 +47,7 @@ def test_vedro_skip_without_reason():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_vedro_skip_with_none_reason():
@@ -55,7 +59,7 @@ def test_vedro_skip_with_none_reason():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_vedro_skip_with_empty_reason():
@@ -67,7 +71,7 @@ def test_vedro_skip_with_empty_reason():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_aliased_skip_with_reason_without_ticket():
@@ -81,7 +85,7 @@ def test_aliased_skip_with_reason_without_ticket():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_reason_with_ticket_prefix_only():
@@ -93,7 +97,7 @@ def test_reason_with_ticket_prefix_only():
         subject = "subject"
     """
     assert_error(ScenarioVisitor, code, SkipReasonTicketMissing,
-                 config=DefaultConfig(require_skip_ticket=True))
+                 config=TICKET_CONFIG)
 
 
 def test_ticket_in_positional_reason():
@@ -104,7 +108,7 @@ def test_ticket_in_positional_reason():
     class Scenario(vedro.Scenario):
         subject = "subject"
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(require_skip_ticket=True))
+    assert_not_error(ScenarioVisitor, code, config=TICKET_CONFIG)
 
 
 def test_ticket_in_keyword_reason():
@@ -117,7 +121,7 @@ def test_ticket_in_keyword_reason():
     class Scenario(vedro.Scenario):
         subject = "subject"
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(require_skip_ticket=True))
+    assert_not_error(ScenarioVisitor, code, config=TICKET_CONFIG)
 
 
 def test_dynamic_reason():
@@ -128,7 +132,7 @@ def test_dynamic_reason():
     class Scenario(vedro.Scenario):
         subject = "subject"
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(require_skip_ticket=True))
+    assert_not_error(ScenarioVisitor, code, config=TICKET_CONFIG)
 
 
 def test_skip_not_from_vedro():
@@ -142,7 +146,7 @@ def test_skip_not_from_vedro():
     class Scenario(vedro.Scenario):
         subject = "subject"
     """
-    assert_not_error(ScenarioVisitor, code, config=DefaultConfig(require_skip_ticket=True))
+    assert_not_error(ScenarioVisitor, code, config=TICKET_CONFIG)
 
 
 def test_custom_ticket_pattern():
@@ -156,7 +160,6 @@ def test_custom_ticket_pattern():
     assert_not_error(
         ScenarioVisitor, code,
         config=DefaultConfig(
-            require_skip_ticket=True,
             skip_ticket_pattern=VedroScenarioStylePlugin.parse_skip_ticket_pattern(r'#\d+')
         )
     )
@@ -173,7 +176,6 @@ def test_custom_ticket_pattern_does_not_match():
     assert_error(
         ScenarioVisitor, code, SkipReasonTicketMissing,
         config=DefaultConfig(
-            require_skip_ticket=True,
             skip_ticket_pattern=VedroScenarioStylePlugin.parse_skip_ticket_pattern(r'#\d+')
         )
     )

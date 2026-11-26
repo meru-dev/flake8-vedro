@@ -29,7 +29,6 @@ allow_partial_redefinitions_in_one_step = True # VDR312
 allow_unused_with_block_attributes = False  # VDR313
 ignore_variables_pattern = ^(log|history).*  # VDR313
 allow_ifs_in_steps = init,given  # VDR314
-require_skip_ticket = true  # VDR111
 skip_ticket_pattern = [A-Z][A-Z0-9]+-\d+  # VDR111
 ```
 

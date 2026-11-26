@@ -1,8 +1,6 @@
 import re
 from typing import List, Optional
 
-from .defaults import Defaults
-
 
 class Config:
     def __init__(self,
@@ -14,7 +12,6 @@ class Config:
                  allow_unused_with_block_attributes: bool,
                  ignore_variables_pattern: Optional[re.Pattern],
                  allow_ifs_in_steps: Optional[tuple[str]] = None,
-                 require_skip_ticket: bool = False,
                  skip_ticket_pattern: Optional[re.Pattern] = None):
         self.is_context_assert_optional = is_context_assert_optional
         self.max_params_count = max_params_count
@@ -24,8 +21,7 @@ class Config:
         self.allow_unused_with_block_attributes = allow_unused_with_block_attributes
         self.ignore_variables_pattern = ignore_variables_pattern
         self.allow_ifs_in_steps = allow_ifs_in_steps or tuple()
-        self.require_skip_ticket = require_skip_ticket
-        self.skip_ticket_pattern = skip_ticket_pattern or re.compile(Defaults.SKIP_TICKET_PATTERN)
+        self.skip_ticket_pattern = skip_ticket_pattern
 
 
 class DefaultConfig(Config):
@@ -38,7 +34,6 @@ class DefaultConfig(Config):
                  allow_unused_with_block_attributes: bool = True,
                  ignore_variables_pattern: Optional[re.Pattern] = None,
                  allow_ifs_in_steps: Optional[tuple[str]] = None,
-                 require_skip_ticket: bool = False,
                  skip_ticket_pattern: Optional[re.Pattern] = None):
         super().__init__(
             is_context_assert_optional=is_context_assert_optional,
@@ -49,6 +44,5 @@ class DefaultConfig(Config):
             allow_unused_with_block_attributes=allow_unused_with_block_attributes,
             ignore_variables_pattern=ignore_variables_pattern,
             allow_ifs_in_steps=allow_ifs_in_steps,
-            require_skip_ticket=require_skip_ticket,
             skip_ticket_pattern=skip_ticket_pattern
         )

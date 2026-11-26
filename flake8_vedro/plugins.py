@@ -103,18 +103,11 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             help='List of steps where branching is allowed: init, given, when, then (rule VDR314)',
         )
         option_manager.add_option(
-            '--require-skip-ticket',
-            default='false',
-            type=str,
-            parse_from_config=True,
-            help='Require a ticket in every vedro.skip reason (rule VDR111)',
-        )
-        option_manager.add_option(
             '--skip-ticket-pattern',
-            default=Defaults.SKIP_TICKET_PATTERN,
+            default=None,
             type=str,
             parse_from_config=True,
-            help='Regex pattern for ticket IDs in vedro.skip reasons (rule VDR111)',
+            help='Regex pattern for ticket IDs in vedro.skip reasons, enables rule VDR111',
         )
 
     @classmethod
@@ -130,7 +123,6 @@ class VedroScenarioStylePlugin(PluginWithFilename):
             allow_unused_with_block_attributes=str_to_bool(options.allow_unused_with_block_attributes),
             ignore_variables_pattern=cls.parse_ignore_variables_pattern(options.ignore_variables_pattern),
             allow_ifs_in_steps=cls.parse_allow_ifs_in_steps(options.allow_ifs_in_steps),
-            require_skip_ticket=str_to_bool(options.require_skip_ticket),
             skip_ticket_pattern=cls.parse_skip_ticket_pattern(options.skip_ticket_pattern)
         )
 
@@ -166,7 +158,10 @@ class VedroScenarioStylePlugin(PluginWithFilename):
         return tuple(allowed_step_prefixes)
 
     @classmethod
-    def parse_skip_ticket_pattern(cls, skip_ticket_pattern: str) -> re.Pattern:
+    def parse_skip_ticket_pattern(cls, skip_ticket_pattern: str | None) -> re.Pattern | None:
+        if skip_ticket_pattern is None:
+            return skip_ticket_pattern
+
         try:
             return re.compile(skip_ticket_pattern)
         except re.error as e:

@@ -32,7 +32,7 @@ class SkipTicketChecker(ScenarioChecker):
         return None
 
     def check_scenario(self, context: Context, config) -> List[Error]:
-        if not config.require_skip_ticket:
+        if config.skip_ticket_pattern is None:
             return []
 
         errors = []
